@@ -5,6 +5,7 @@ dotdir= $(HOME)
 SCRIPTS= \
     patch-normalise-hunk.pl \
     vgunique \
+    linkinstall \
 
 DOTFILES= \
     vimrc \

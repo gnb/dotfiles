@@ -1,0 +1,166 @@
+#!/bin/bash
+#
+# Drop-in replacement for the GNU 'install' program that uses hardlinks
+# where possible to reduce IO overhead of installation.
+#
+# Copyright (c) 2011 Greg Banks <gnb@fmeh.org>
+#
+use strict;
+use warnings;
+use Data::Dumper;
+
+OP=install
+MODE=
+OWNER=
+GROUP=
+DST=
+DST_IS=dir
+declare -A FILES
+NFILES=0
+# DRYRUN=echo
+DRYRUN=
+
+function usage()
+{
+    echo "Usage: $0 [options] src[...] dst" 1>&2
+    echo "Usage: $0 [options] -t dst src[...]" 1>&2
+    echo "Usage: $0 [options] -d dstdir" 1>&2
+    exit 1
+}
+
+# Append 2nd arg to array named by 1st arg
+# Like Perl's push
+function push()
+{
+    local var="$1"
+    local value="$2"
+    eval "$var[\${#$var[*]}]=\"$value\""
+}
+
+# Remove the last element in the array named by the 1st
+# arg and assign it to the variable named by the 2nd.
+# A little like Perl's pop.
+function popto()
+{
+    local var="$1"
+    local tgt="$2"
+    local n=
+    eval "n=\${#$var[*]}"
+    if [ $n -eq 0 ] ; then
+	eval "unset $tgt"
+	false
+    else
+	n=$[n-1]
+	eval "$tgt=\"\${$var[$n]}\""
+	eval "unset $var[$n]"
+	true
+    fi
+}
+
+while [ $# -gt 0 ] ; do
+    case "$1" in
+    # options with no argument, ignored for compatibility
+    -c|-b|-C|--compare|-s|--strip|--backup=*) ;;
+    --strip-program=*|--suffix=*|--preserve-context|-v|--verbose|--context=*) ;;
+    # options with an argument, ignored for compatibility
+    --backup|-S|--suffix) ;;
+    # options we actually use
+    -m) MODE="$2"; shift ;;
+    --mode=*) MODE="${1#*=}" ;;
+    -o|--owner) OWNER="$2"; shift ;;
+    --owner=*) OWNER="${1#*=}" ;;
+    -g|--group) GROUP="$2"; shift ;;
+    --group=*) GROUP="${1#*=}" ;;
+    -d|--directory) OP=mkdir ;;
+    -D) DST_IS=file ;;
+    -T|--no-target-directory) DST_IS=file ;;
+    -t|--target-directory)
+	[ -z "$DST" ] || usage
+	DST="$2"
+	DST_IS=dir
+	shift
+	;;
+    --target-directory=*)
+	[ -z "$DST" ] || usage
+	DST="${1#*=}"
+	DST_IS=dir
+	;;
+    --help) usage ;;
+    --version) echo "1.0" ; exit 0 ;;
+    -*) usage ;;
+    *) push FILES "$1" ;;
+    esac
+    shift
+done
+
+[ ${#FILES[*]} -gt 0 ] || usage
+if [ -z "$DST" ]; then
+    popto FILES DST
+fi
+case "$OP" in
+install)
+    [ ${#FILES[*]} -gt 0 ] || usage
+    [ $DST_IS = file -a ${#FILES[*]} -gt 1 ] && usage
+    ;;
+mkdir)
+    [ ${#FILES[*]} -eq 0 ] || usage
+    ;;
+esac
+
+# echo "OP=\"$OP\""
+# echo "MODE=\"$MODE\""
+# echo "OWNER=\"$OWNER\""
+# echo "GROUP=\"$GROUP\""
+# echo "DST=\"$DST\""
+# echo "DST_IS=\"$DST_IS\""
+#
+# echo -n "FILES="
+# for file in "${FILES[@]}" ; do
+#     echo -n "\"$file\" "
+# done
+# echo ""
+#
+# exit 1
+
+# Make the target directory
+target_dir="$DST"
+[ $DST_IS = file ] && target_dir="${target_dir%/*}"
+if [ ! -d "$target_dir" ] ; then
+    $DRYRUN mkdir -p "$target_dir"
+fi
+[ $OP = mkdir ] && exit 0
+
+# Install the files
+target_device=$(stat -c '%D' "$target_dir")
+for src in "${FILES[@]}" ; do
+    target="$DST"
+    [ $DST_IS = dir ] && target="$target/"$(basename "$src")
+
+    set -- $(stat -c '%a %D %u %U %g %G' "$src")
+    [ $# -eq 6 ] || exit 1
+    fmode="$1"
+    fdevice="$2"
+    fuserid="$3"
+    fusername="$4"
+    fgroupid="$5"
+    fgroupname="$6"
+
+    may_link=yes
+    [ "$fdevice" != "$target_device" ] && may_link=no
+    [ -n "$MODE" -a "$MODE" != $fmode ] && may_link=no
+    [ -n "$OWNER" -a "$OWNER" != $fuserid -a "$OWNER" != $fusername ] && may_link=no
+    [ -n "$GROUP" -a "$GROUP" != $fgroupid -a "$GROUP" != $fgroupname ] && may_link=no
+
+    if [ $may_link = yes ] ; then
+	$DRYRUN ln -nf "$src" "$target"
+    else
+	$DRYRUN cp -f "$src" "$target"
+	[ -n "$MODE" ] && $DRYRUN chmod "$MODE" "$target"
+	[ -n "$OWNER" ] && $DRYRUN chown "$OWNER" "$target"
+	[ -n "$GROUP" ] && $DRYRUN chgrp "$GROUP" "$target"
+    fi
+
+    [ -n "$MANIFEST" ] && stat -c '%f %U %G %s %n' "$target" >> $MANIFEST
+done
+
+exit 0
