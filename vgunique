@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+#
+# Takes a concatenated series of Valgrind logfiles on stdin,
+# parses them for Valgrind-reported stack traces, and uniqifies
+# the stack traces such that each error is reported once, then
+# emits the unique stack traces on stdout.
+#
+# Copyright (c) 2011 Greg Banks <gnb@fmeh.org>
+#
+use strict;
+use warnings;
+use Data::Dumper;
+
+my $hdr;
+my @stack;
+my %stacks;
+
+sub finish_stack
+{
+    return unless scalar @stack;
+
+    my $flat = join("\n", @stack);
+# print "===> " . $flat . "\n";
+    $stacks{$flat} ||= 0;
+    $stacks{$flat}++;
+    @stack = ();
+}
+
+while (<>)
+{
+    chomp;
+    if (!m/^==\d+==\s/)
+    {
+	# not a VG a line - certainly the end of a stack
+	finish_stack();
+	next;
+    }
+    # trim off the VG line header
+    s/^==\d+== //;
+
+    # don't need blank lines
+    next if m/^\s*$/;
+
+    # anonymise addresses
+    s/Address 0x[0-9a-fA-F]+ is/Address ADDR is/;
+
+    my $l = $_;
+    if (m/^\S/)
+    {
+	# start of a new stack
+	finish_stack();
+    }
+
+    push(@stack, $l);
+#     $state = 0 if m/^\S/;
+#     print "<$state>$_\n";
+#     $state++;
+}
+
+finish_stack();
+
+while (my ($flat, $count) = each %stacks)
+{
+    printf "[%d] %s\n\n", $count, $flat;
+}
