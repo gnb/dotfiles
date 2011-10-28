@@ -76,14 +76,14 @@ endfunction
 " set bufhidden=hide
 " set noswapfile
 " set nobuflisted
-" function PatchTestApply()
+" function PatchTryApply()
 "     let cmd = ":1,$"
 "     execute cmd
 " endfunction
 
 " function PatchAddCommands()
-"     if !exists(":testapply")
-" 	command testapply :call PatchTestApply()
+"     if !exists(":try")
+" 	command try :call PatchTryApply()
 "     endif
 " endfunction
 
@@ -152,8 +152,9 @@ function PatchLinesIdentical()
 endfunction
 
 function PatchTryApply()
+    let patchfname = expand("%:p")
     let patchlines = getline(1,"$")
-    let output = system("patch -p1 --dry-run", join(patchlines, "\n"))
+    let output = system("patch -p1 -f --dry-run 2>&1", join(patchlines, "\n") . "\n")
 
     " Scan the patch lines to find hunk boundaries
     " Build a dict which maps [file:hunknum] -> patch-line-num
@@ -185,16 +186,34 @@ function PatchTryApply()
 	if line =~ '^patching file '
 	    let fname = strpart(line, 14)
 "	    let reports = reports + [ "F " . fname ]
+	elseif line =~ '^Hunk #[0-9]\+ succeeded at [0-9]\+ with fuzz'
+	    let hnum = matchstr(line, '[0-9]\+')
+	    let flnum = matchstr(line, '[0-9]\+', 12)
+	    let msg = matchstr(line, 'fuzz[^.]*')
+	    let fileloc = fname . ":" . flnum
+	    let patchloc = patchfname . ":" . hunks[fname . ":" . hnum]
+	    let reports += [ patchloc . ": Hunk " . msg . " at " . fileloc ]
 	elseif line =~ '^Hunk #[0-9]\+ FAILED at [0-9]\+\.$'
 	    let hnum = matchstr(line, '[0-9]\+')
-	    let flnum = matchstr(line, '[0-9]\+', 10)
-	    let lnum = hunks[fname . ":" . hnum]
-	    let reports = reports + [ lnum . ": Hunk FAILED at " . fname . ":" . flnum ]
+	    let flnum = matchstr(line, '[0-9]\+', 12)
+	    let fileloc = fname . ":" . flnum
+	    let patchloc = patchfname . ":" . hunks[fname . ":" . hnum]
+	    let reports += [ patchloc . ": Hunk FAILED at " . fileloc ]
+	elseif line =~ '^patch:.*malformed patch at line [0-9]\+:'
+	    let plnum = matchstr(line, '[0-9]\+')
+	    let patchloc = patchfname . ":" . plnum
+	    let reports += [ patchloc . ": malformed patch" ]
 	endif
     endfor
 
-    execute "new"
-    call setline(1, reports)
+    if reports == []
+	echo "Patch will apply with no failures or fuzz"
+    else
+	" build a quickfix list on the current window; the user
+	" can now cycle through the errors using commands like
+	" :cn :cp :crewind and :clist
+	cexpr reports
+    endif
 endfunction
 
 function DetectQuiltPatches()
@@ -210,7 +229,7 @@ autocmd FileType diff map <buffer> <Esc>s :call PatchSignoff()<CR>
 autocmd FileType diff map <buffer> <Esc>d :call PatchEditFile()<CR>
 autocmd FileType diff map <buffer> <Esc>g :call PatchSelectHunk()<CR>
 autocmd FileType diff map <buffer> <Esc>i :call PatchLinesIdentical()<CR>
-autocmd FileType diff map <buffer> <Esc>t :call PatchTryApply()<CR>
+autocmd FileType diff map <buffer> <Esc>a :call PatchTryApply()<CR>
 " The tricks for highlighting bad whitespace need to be
 " adjusted for diffs.
 autocmd FileType diff highlight clear BadLeadingWS
