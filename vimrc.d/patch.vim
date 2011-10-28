@@ -76,10 +76,6 @@ endfunction
 " set bufhidden=hide
 " set noswapfile
 " set nobuflisted
-" function PatchTryApply()
-"     let cmd = ":1,$"
-"     execute cmd
-" endfunction
 
 " function PatchAddCommands()
 "     if !exists(":try")
