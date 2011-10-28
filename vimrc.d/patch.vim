@@ -235,9 +235,10 @@ autocmd FileType diff map <buffer> <Esc>a :call PatchTryApply()<CR>
 autocmd FileType diff highlight clear BadLeadingWS
 autocmd FileType diff highlight clear TrailingWS
 autocmd FileType diff highlight PatchInvalidLead ctermbg=red
-autocmd FileType diff let m = matchadd("PatchInvalidLead", "^[^-+ @]")
+autocmd FileType diff let b:patch_match_1 = matchadd("PatchInvalidLead", "^[^-+ @]")
 autocmd FileType diff highlight PatchBadLeadingWS ctermbg=red
-autocmd FileType diff let m = matchadd("PatchBadLeadingWS", "\\%2v[ \t]* \t[ \t]*")
+autocmd FileType diff let b:patch_match_2 = matchadd("PatchBadLeadingWS", "\\%2v[ \t]* \t[ \t]*")
 autocmd FileType diff highlight PatchTrailingWS ctermbg=red
-autocmd FileType diff let m = matchadd("PatchTrailingWS", "\\%>1v[ \t]\\+$")
+autocmd FileType diff let b:patch_match_2 = matchadd("PatchTrailingWS", "\\%>1v[ \t]\\+$")
+
 " autocmd FileType diff call PatchAddCommands()
