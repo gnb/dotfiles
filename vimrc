@@ -4,6 +4,7 @@ set softtabstop=4
 set tabstop=8
 set textwidth=72
 set formatoptions+=cro
+" Remember:  gq]/  formats to the end of the comment
 set nowrap
 syntax on
 highlight Comment ctermfg=darkgrey
