@@ -31,6 +31,7 @@ autocmd FileType php map <buffer> <Esc>c 0i// <Esc>j
 autocmd FileType mail map <buffer> <Esc>c 0i> <Esc>j
 autocmd FileType tex map <buffer> <Esc>c 0i% <Esc>j
 autocmd FileType javascript map <buffer> <Esc>c 0i// <Esc>j
+autocmd FileType c map <buffer> <Esc>n :cn<CR>
 source ~/.vimrc.d/patch.vim
 source ~/.vimrc.d/cscope.vim
 source ~/.vimrc.d/quilt.vim
