@@ -160,7 +160,8 @@ function PatchTryApply()
     let lnum = 1
     for line in patchlines
 	if line =~ '^+++ '
-	    let fname = strpart(line, 5)
+	    let words = split(line)
+	    let fname = words[1]
 	    " Hardcoded to -p1
 	    let fname = strpart(fname, stridx(fname, '/')+1)
 	    let hnum = 1
