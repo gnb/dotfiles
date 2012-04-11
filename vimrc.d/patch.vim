@@ -147,6 +147,19 @@ function PatchLinesIdentical()
     normal r 
 endfunction
 
+" Load a scratch buffer with the given filename
+" and return the given subset of lines in it
+function PatchGetFileLines(fname, first, len)
+    execute ":new"
+    execute ":setlocal buftype=nofile"
+    execute ":setlocal bufhidden=hide"
+    execute ":setlocal noswapfile"
+    execute ":read " . a:fname
+    let lines = getline(a:first+1, a:first + 1 + a:len)
+    execute ":quit"
+    return lines
+endfunction
+
 function PatchTryApply()
     let patchfname = expand("%:p")
     let patchlines = getline(1,"$")
@@ -154,26 +167,41 @@ function PatchTryApply()
 
     " Scan the patch lines to find hunk boundaries
     " Build a dict which maps [file:hunknum] -> patch-line-num
-    let hunks = {}
+    let hunkstarts = {}
+    let hunkends = {}
     let fname = ""
     let hnum = 0
     let lnum = 1
     for line in patchlines
 	if line =~ '^+++ '
+	    if fname != ""
+		if hnum != 0
+		    let hunkends[fname . ":" . hnum] = lnum - 1
+		endif
+	    endif
 	    let words = split(line)
 	    let fname = words[1]
+
 	    " Hardcoded to -p1
 	    let fname = strpart(fname, stridx(fname, '/')+1)
 	    let hnum = 1
 	elseif line =~ '^@@ '
 	    if fname != ""
-		let hunks[fname . ":" . hnum] = lnum
+		if hnum != 0
+		    let hunkends[fname . ":" . (hnum-1)] = lnum - 1
+		endif
+		let hunkstarts[fname . ":" . hnum] = lnum
 		let hnum = hnum + 1
 "		echo "XX F " . fname . " H " . hnum . " -> " . lnum
 	    endif
 	endif
 	let lnum = lnum + 1
     endfor
+    if fname != ""
+	if hnum != 0
+	    let hunkends[fname . ":" . (hnum-1)] = lnum
+	endif
+    endif
 
     " Parse the output for hunk fail messages
     let reports = []
@@ -188,14 +216,39 @@ function PatchTryApply()
 	    let flnum = matchstr(line, '[0-9]\+', 12)
 	    let msg = matchstr(line, 'fuzz[^.]*')
 	    let fileloc = fname . ":" . flnum
-	    let patchloc = patchfname . ":" . hunks[fname . ":" . hnum]
+	    let patchloc = patchfname . ":" . hunkstarts[fname . ":" . hnum]
 	    let reports += [ patchloc . ": Hunk " . msg . " at " . fileloc ]
 	elseif line =~ '^Hunk #[0-9]\+ FAILED at [0-9]\+\.$'
 	    let hnum = matchstr(line, '[0-9]\+')
 	    let flnum = matchstr(line, '[0-9]\+', 12)
 	    let fileloc = fname . ":" . flnum
-	    let patchloc = patchfname . ":" . hunks[fname . ":" . hnum]
+	    let hunkstart = hunkstarts[fname . ":" . hnum]
+	    let hunkend = hunkends[fname . ":" . hnum]
+	    let patchloc = patchfname . ":" . hunkstart
 	    let reports += [ patchloc . ": Hunk FAILED at " . fileloc ]
+	    let hunklines = getline(hunkstart+1, hunkend)
+	    let len = hunkend - (hunkstart+1)
+	    let contextlines = PatchGetFileLines(fname, flnum, len)
+	    for hline in hunklines
+		let hunkstart = hunkstart+1
+		if hline !~ '^[- ]'
+		    continue
+		endif
+		let hline = strpart(hline, 1)
+		let found = -1
+		for i in [0,1,2,3]
+		    if hline == contextlines[i]
+			let found = i
+			break
+		    endif
+		endfor
+		if found >= 0
+		    let x = remove(contextlines, 0, found)
+		else
+		    let reports += [ patchfname . ":" . hunkstart . ": Bad context" ]
+		endif
+	    endfor
+
 	elseif line =~ '^patch:.*malformed patch at line [0-9]\+:'
 	    let plnum = matchstr(line, '[0-9]\+')
 	    let patchloc = patchfname . ":" . plnum
