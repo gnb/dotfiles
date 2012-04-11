@@ -36,3 +36,5 @@ install-dotfiles:
 	    $(INSTALL_DOTFILE) $$file $(DESTDIR)/$(dotdir)/.$$file ;\
 	done
 
+diff:
+	$(MAKE) INSTALL_SCRIPT="diff -u" INSTALL_DOTFILE="diff -u" install
