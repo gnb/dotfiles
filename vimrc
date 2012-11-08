@@ -18,6 +18,8 @@ let m = matchadd("TrailingWS", "[ \t]\\+$")
 " where normalised means all the tabs are at the front
 highlight BadLeadingWS ctermbg=red
 let m = matchadd("BadLeadingWS", "^[ \t]* \t[ \t]*")
+highlight BadLeadingWS2 ctermbg=red
+let m = matchadd("BadLeadingWS2", "^\t* \\{8,\\}[ \t]*")
 " make Alt-C comment out a line in various modes
 autocmd FileType perl map <buffer> <Esc>c 0i# <Esc>j
 autocmd FileType sh map <buffer> <Esc>c 0i# <Esc>j
