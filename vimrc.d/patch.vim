@@ -323,13 +323,13 @@ function DetectQuiltPatches()
 endfunction
 autocmd BufReadPre * call DetectQuiltPatches()
 
-autocmd FileType diff map <buffer> <Esc>n :call PatchNormaliseHunk()<CR>
-autocmd FileType diff map <buffer> <Esc>s :call PatchSignoff()<CR>
-autocmd FileType diff map <buffer> <Esc>d :call PatchEditFile()<CR>
-autocmd FileType diff map <buffer> <Esc>g :call PatchSelectHunk()<CR>
-autocmd FileType diff map <buffer> <Esc>i :call PatchLinesIdentical()<CR>
-autocmd FileType diff map <buffer> <Esc>a :call PatchTryApply()<CR>
-autocmd FileType diff map <buffer> <Esc>x :call PatchExplain()<CR>
+autocmd FileType diff map <buffer> <Leader>n :call PatchNormaliseHunk()<CR>
+autocmd FileType diff map <buffer> <Leader>s :call PatchSignoff()<CR>
+autocmd FileType diff map <buffer> <Leader>d :call PatchEditFile()<CR>
+autocmd FileType diff map <buffer> <Leader>g :call PatchSelectHunk()<CR>
+autocmd FileType diff map <buffer> <Leader>i :call PatchLinesIdentical()<CR>
+autocmd FileType diff map <buffer> <Leader>a :call PatchTryApply()<CR>
+autocmd FileType diff map <buffer> <Leader>x :call PatchExplain()<CR>
 " The tricks for highlighting bad whitespace need to be
 " adjusted for diffs.
 autocmd FileType diff highlight clear BadLeadingWS
