@@ -9,6 +9,7 @@ set nowrap
 syntax on
 highlight Comment ctermfg=darkgrey
 set exrc
+set modeline
 set modelines=5
 " Highlight trailing whitespace in red
 highlight TrailingWS ctermbg=red
