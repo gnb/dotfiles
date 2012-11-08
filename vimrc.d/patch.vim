@@ -71,18 +71,6 @@ function PatchNormaliseHunk()
     call s:RestoreCursor()
 endfunction
 
-" set buftype=nofile
-" OR MAYBE set buftype=quickfix
-" set bufhidden=hide
-" set noswapfile
-" set nobuflisted
-
-" function PatchAddCommands()
-"     if !exists(":try")
-" 	command try :call PatchTryApply()
-"     endif
-" endfunction
-
 function PatchSignoff()
     execute ":1,$!patch-signoff.pl"
 endfunction
