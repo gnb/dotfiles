@@ -147,6 +147,26 @@ function PatchSelectHunk()
     execute "normal " . (end-start) . "j"
 endfunction
 
+function PatchReverseHunk()
+    let start = s:HunkStart()
+    let end = s:HunkEnd()
+    if end < 0 || start < 0
+	return
+    endif
+
+    let lno = start+1
+    let context = []
+    while lno <= end
+	let ll = getline(lno)
+	if ll =~ '^-'
+	    call setline(lno, "+" . strpart(ll, 1))
+	elseif ll =~ '^+'
+	    call setline(lno, "-" . strpart(ll, 1))
+	endif
+	let lno += 1
+    endwhile
+endfunction
+
 function PatchExplain()
     let start = s:HunkStart()
     let end = s:HunkEnd()
@@ -330,6 +350,7 @@ autocmd FileType diff map <buffer> <Leader>g :call PatchSelectHunk()<CR>
 autocmd FileType diff map <buffer> <Leader>i :call PatchLinesIdentical()<CR>
 autocmd FileType diff map <buffer> <Leader>a :call PatchTryApply()<CR>
 autocmd FileType diff map <buffer> <Leader>x :call PatchExplain()<CR>
+autocmd FileType diff map <buffer> <Leader>r :call PatchReverseHunk()<CR>
 " The tricks for highlighting bad whitespace need to be
 " adjusted for diffs.
 autocmd FileType diff highlight clear BadLeadingWS
