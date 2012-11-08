@@ -59,6 +59,55 @@ function s:FileStart()
     return -1
 endfunction
 
+function s:HunkFile()
+    " Find the previous file header in the patch
+    let start = s:FileStart()
+    if start < 0
+	return null
+    endif
+    " Extract the name of a readable file from the file header
+    let file = matchstr(getline(start), '[^ \t]\+', 4)
+    while file != "" && !filereadable(file)
+	echo ">> file=\"" . file . "\""
+	let ii = matchend(file, '/\+')
+	if ii < 0
+	    return
+	endif
+	let file = strpart(file, ii)
+    endwhile
+    " At this point 'file' is the filename of a readable file
+    return file
+endfunction
+
+" Return a list describing the shape of the hunk from the hunk header
+" First 2 elements are line number and length in the old file;
+" next 2 elements are line number and length in the new file.
+function s:HunkShape()
+    " Find the previous hunk header in the patch
+    let start = s:HunkStart()
+    if start < 0
+	return
+    endif
+    " Extract a line number from the hunk header
+    let matches = matchlist(getline(start), '^@@ -\([0-9]\+\),\([0-9]\+\) +\([0-9]\+\),\([0-9]\+\)')
+    return [ matches[1], matches[2], matches[3], matches[4] ]
+endfunction
+
+function s:HunkOldStart()
+    let shape = s:HunkShape()
+    return shape[0]
+endfunction
+
+function s:HunkOldLength()
+    let shape = s:HunkShape()
+    return shape[1]
+endfunction
+
+function s:HunkOldEnd()
+    let shape = s:HunkShape()
+    return shape[1]+shape[2]-1
+endfunction
+
 function PatchNormaliseHunk()
     call s:SaveCursor()
     let start = s:HunkStart()
@@ -76,33 +125,15 @@ function PatchSignoff()
 endfunction
 
 function PatchEditFile()
-    " Find the previous file header in the patch
-    let start = s:FileStart()
-    if start < 0
+    let file = s:HunkFile()
+    if file == ""
 	return
     endif
-    " Extract the name of a readable file from the file header
-    let file = matchstr(getline(start), '[^ \t]\+', 4)
-    while file != "" && !filereadable(file)
-	echo ">> file=\"" . file . "\""
-	let ii = matchend(file, '/\+')
-	if ii < 0
-	    return
-	endif
-	let file = strpart(file, ii)
-    endwhile
-    " At this point 'file' is the filename of a readable file
-    " Find the previous hunk header in the patch
     let here = line(".")
-    let start = s:HunkStart()
-    if start < 0
-	return
-    endif
-    " Extract a line number from the hunk header
-    let line = matchstr(getline(start), '[0-9]\+', 4)
+    let line = s:HunkOldStart()
     " Open a new buffer with the file and seek to the line
     execute ":new " . file
-    execute ":" . (line + (here - start - 1))
+    execute ":" . (line + (here - s:FileStart() - 1))
 endfunction
 
 function PatchSelectHunk()
@@ -114,6 +145,36 @@ function PatchSelectHunk()
     execute ":" . start
     normal V
     execute "normal " . (end-start) . "j"
+endfunction
+
+function PatchExplain()
+    let start = s:HunkStart()
+    let end = s:HunkEnd()
+    if end < 0 || start < 0
+	return
+    endif
+
+    " Extract the patch context into a temp file
+    let lno = start+1
+    let context = []
+    while lno <= end
+	let ll = getline(lno)
+	if ll =~ '^[ -]'
+	    let context += [ strpart(ll, 1) ]
+	endif
+	let lno += 1
+    endwhile
+    let expectedfile = tempname()
+    call writefile(context, expectedfile)
+
+    " Extract the old file region into a temp file
+    let actualfile = tempname()
+    call system("sed -n -e '" . s:HunkOldStart() . "," . s:HunkOldEnd() . "p' " . s:HunkFile() . " > " . actualfile)
+
+    execute(":new")
+    execute(":r!diff -U0 " . expectedfile . " " . actualfile)
+    call system("/bin/rm -f " . actualfile)
+    call system("/bin/rm -f " . expectedfile)
 endfunction
 
 function PatchLinesIdentical()
@@ -268,6 +329,7 @@ autocmd FileType diff map <buffer> <Esc>d :call PatchEditFile()<CR>
 autocmd FileType diff map <buffer> <Esc>g :call PatchSelectHunk()<CR>
 autocmd FileType diff map <buffer> <Esc>i :call PatchLinesIdentical()<CR>
 autocmd FileType diff map <buffer> <Esc>a :call PatchTryApply()<CR>
+autocmd FileType diff map <buffer> <Esc>x :call PatchExplain()<CR>
 " The tricks for highlighting bad whitespace need to be
 " adjusted for diffs.
 autocmd FileType diff highlight clear BadLeadingWS
