@@ -261,7 +261,6 @@ function PatchTryApply()
 		endif
 		let hunkstarts[fname . ":" . hnum] = lnum
 		let hnum = hnum + 1
-"		echo "XX F " . fname . " H " . hnum . " -> " . lnum
 	    endif
 	endif
 	let lnum = lnum + 1
