@@ -9,10 +9,10 @@ SCRIPTS= \
 
 DOTFILES= \
     vimrc \
-    vimrc.d/cscope.vim \
-    vimrc.d/patch.vim \
-    vimrc.d/quilt.vim \
-    vimrc.d/valgrind.vim \
+    vim/plugin/cscope.vim \
+    vim/plugin/patch.vim \
+    vim/plugin/quilt.vim \
+    vim/plugin/valgrind.vim \
 
 all: $(SCRIPTS)
 
