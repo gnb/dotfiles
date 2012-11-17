@@ -3,7 +3,6 @@ bindir=	$(HOME)/bin
 dotdir= $(HOME)
 
 SCRIPTS= \
-    patch-normalise-hunk.pl \
     vgunique \
     linkinstall \
 

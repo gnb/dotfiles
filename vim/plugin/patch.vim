@@ -3,6 +3,9 @@
 "
 " By Greg Banks <greg.n.banks@gmail.com> 2008/09/12
 "
+" includes a reimplementation of patch-normalise-hunk.pl
+" which was Copyright (c) 2005 Greg Banks <gnb@alphalink.com.au>
+"
 function s:SaveCursor()
     let s:curs_line = line(".")
     let s:curs_col = col(".")
@@ -82,6 +85,7 @@ endfunction
 " Return a list describing the shape of the hunk from the hunk header
 " First 2 elements are line number and length in the old file;
 " next 2 elements are line number and length in the new file.
+" 5th element is the context string
 function s:HunkShape()
     " Find the previous hunk header in the patch
     let start = s:HunkStart()
@@ -89,8 +93,8 @@ function s:HunkShape()
 	return
     endif
     " Extract a line number from the hunk header
-    let matches = matchlist(getline(start), '^@@ -\([0-9]\+\),\([0-9]\+\) +\([0-9]\+\),\([0-9]\+\)')
-    return [ matches[1], matches[2], matches[3], matches[4] ]
+    let matches = matchlist(getline(start), '^@@ -\(\d\+\),\(\d\+\) +\(\d\+\),\(\d\+\) @@\(.*\)')
+    return matches[1:5]
 endfunction
 
 function s:HunkOldStart()
@@ -108,6 +112,21 @@ function s:HunkOldEnd()
     return shape[1]+shape[2]-1
 endfunction
 
+function s:MakeHunk(ostart, nstart, context, lines)
+    let olen = 0
+    let nlen = 0
+    for ll in a:lines
+	if ll =~ '^[- ]'
+	    let olen += 1
+	endif
+	if ll =~ '^[+ ]'
+	    let nlen += 1
+	endif
+    endfor
+    let header = "@@ -" . a:ostart . "," . olen . " +" . a:nstart . "," . nlen . " @@" . a:context
+    return [ header ] + a:lines
+endfunction
+
 function PatchNormaliseHunk()
     call s:SaveCursor()
     let start = s:HunkStart()
@@ -115,8 +134,71 @@ function PatchNormaliseHunk()
     if end < 0 || start < 0
 	return
     endif
-    let cmd = ":" . start . "," . end . "!patch-normalise-hunk.pl"
-    execute cmd
+    let [ostart, olen, nstart, nlen, context] = s:HunkShape()
+    let lno = start+1
+    let lines = []
+    while lno <= end
+	let ll = getline(lno)
+	if ll =~ '^[-+ ]'
+	    let lines += [ ll ]
+	endif
+	let lno += 1
+    endwhile
+    let normlines = []
+    let hunklines = []
+    let started_hunk = 0
+    let NUM_CONTEXT_LINES = 3
+    let ncontext = 0
+    let oline = ostart
+    let nline = nstart
+    for ll in lines
+	if ll =~ '^ '
+	    if !started_hunk
+		" leading context
+		if len(hunklines) == NUM_CONTEXT_LINES
+		    unlet hunklines[0]
+		endif
+		let hunklines += [ ll ]
+		let ncontext = len(hunklines)
+	    else
+		" context after a change
+		if ncontext == 2*NUM_CONTEXT_LINES
+		    " end this hunk
+		    let normlines += s:MakeHunk(ostart, nstart, context, remove(hunklines, 0, -(ncontext-NUM_CONTEXT_LINES+1)))
+		    let ncontext = len(hunklines)
+		    let started_hunk = 0
+		else
+		    let hunklines += [ ll ]
+		    let ncontext += 1
+		endif
+	    endif
+	    let oline += 1
+	    let nline += 1
+	else
+	    " old or new line
+	    if !started_hunk
+		let ostart = oline - ncontext
+		let nstart = nline - ncontext
+		let started_hunk = 1
+	    endif
+	    let ncontext = 0
+	    let hunklines += [ ll ]
+	    if ll =~ '^+'
+		let oline += 1
+	    else
+		let nline += 1
+	    endif
+	endif
+    endfor
+    if started_hunk
+	let trim = -1
+	if ncontext > NUM_CONTEXT_LINES
+	    let trim = -(ncontext-NUM_CONTEXT_LINE+1)
+	endif
+	let normlines += s:MakeHunk(ostart, nstart, context, remove(hunklines, 0, trim))
+    endif
+    execute ":" . start . "," . end . "d"
+    call append(start-1, normlines)
     call s:RestoreCursor()
 endfunction
 
@@ -275,10 +357,8 @@ function PatchTryApply()
     let reports = []
     let fname = ""
     for line in split(output, '\n')
-"	let reports = reports + [ "> " . line ]
 	if line =~ '^patching file '
 	    let fname = strpart(line, 14)
-"	    let reports = reports + [ "F " . fname ]
 	elseif line =~ '^Hunk #[0-9]\+ succeeded at [0-9]\+ with fuzz'
 	    let hnum = matchstr(line, '[0-9]\+')
 	    let flnum = matchstr(line, '[0-9]\+', 12)
