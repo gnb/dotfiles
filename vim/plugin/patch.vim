@@ -193,7 +193,7 @@ function PatchNormaliseHunk()
     if started_hunk
 	let trim = -1
 	if ncontext > NUM_CONTEXT_LINES
-	    let trim = -(ncontext-NUM_CONTEXT_LINE+1)
+	    let trim = -(ncontext-NUM_CONTEXT_LINES+1)
 	endif
 	let normlines += s:MakeHunk(ostart, nstart, context, remove(hunklines, 0, trim))
     endif
