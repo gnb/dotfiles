@@ -211,11 +211,10 @@ function PatchEditFile()
     if file == ""
 	return
     endif
-    let here = line(".")
-    let line = s:HunkOldStart()
+    let ll = line(".") - s:HunkStart() + s:HunkOldStart()
     " Open a new buffer with the file and seek to the line
     execute ":new " . file
-    execute ":" . (line + (here - s:FileStart() - 1))
+    execute ":" . ll
 endfunction
 
 function PatchSelectHunk()
