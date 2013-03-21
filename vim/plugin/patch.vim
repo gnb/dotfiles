@@ -71,7 +71,7 @@ function s:HunkFile()
     " Extract the name of a readable file from the file header
     let file = matchstr(getline(start), '[^ \t]\+', 4)
     while file != "" && !filereadable(file)
-	echo ">> file=\"" . file . "\""
+"	echo ">> file=\"" . file . "\""
 	let ii = matchend(file, '/\+')
 	if ii < 0
 	    return
