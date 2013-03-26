@@ -389,7 +389,7 @@ function PatchTryApply()
 		let hline = strpart(hline, 1)
 		let found = -1
 		for i in [0,1,2,3]
-		    if hline == contextlines[i]
+		    if hline == get(contextlines, i, "")
 			let found = i
 			break
 		    endif
