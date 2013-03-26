@@ -317,6 +317,7 @@ function PatchTryApply()
 
     " Scan the patch lines to find hunk boundaries
     " Build a dict which maps [file:hunknum] -> patch-line-num
+    " Hunks are numbered from 1.
     let hunkstarts = {}
     let hunkends = {}
     let fname = ""
@@ -334,23 +335,27 @@ function PatchTryApply()
 
 	    " Hardcoded to -p1
 	    let fname = strpart(fname, stridx(fname, '/')+1)
-	    let hnum = 1
+	    let hnum = 0
 	elseif line =~ '^@@ '
 	    if fname != ""
 		if hnum != 0
-		    let hunkends[fname . ":" . (hnum-1)] = lnum - 1
+		    let hunkends[fname . ":" . hnum] = lnum - 1
 		endif
-		let hunkstarts[fname . ":" . hnum] = lnum
 		let hnum = hnum + 1
+		let hunkstarts[fname . ":" . hnum] = lnum
 	    endif
 	endif
 	let lnum = lnum + 1
     endfor
     if fname != ""
 	if hnum != 0
-	    let hunkends[fname . ":" . (hnum-1)] = lnum
+	    let hunkends[fname . ":" . hnum] = lnum
 	endif
     endif
+
+"    for k in keys(hunkstarts)
+"	echo "XXX hunk " . k . " start=" . hunkstarts[k] . " end=" . hunkends[k]
+"    endfor
 
     " Parse the output for hunk fail messages
     let reports = []
