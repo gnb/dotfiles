@@ -37,3 +37,15 @@ install-dotfiles:
 
 diff:
 	$(MAKE) INSTALL_SCRIPT="diff -u" INSTALL_DOTFILE="diff -u" install
+
+reverse-install:
+	@for file in $(SCRIPTS) ; do \
+	    diff $(DESTDIR)/$(bindir)/$$file $$file > /dev/null && continue;\
+	    echo "reverse installing $$file" ;\
+	    cp $(DESTDIR)/$(bindir)/$$file $$file;\
+	done
+	@for file in $(DOTFILES) ; do \
+	    diff $(DESTDIR)/$(dotdir)/.$$file $$file > /dev/null && continue;\
+	    echo "reverse installing $$file" ;\
+	    cp $(DESTDIR)/$(dotdir)/.$$file $$file;\
+	done
