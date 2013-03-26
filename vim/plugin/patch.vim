@@ -397,7 +397,7 @@ function PatchTryApply()
 		if found >= 0
 		    let x = remove(contextlines, 0, found)
 		else
-		    let reports += [ patchfname . ":" . hunkstart . ": Bad context" ]
+		    let reports += [ patchfname . ":" . hunkstart . ": context line not matched" ]
 		endif
 	    endfor
 
