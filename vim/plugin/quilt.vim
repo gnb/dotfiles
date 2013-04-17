@@ -28,11 +28,14 @@ function QuiltInit()
 	endif
 	if isdirectory(dir . "/patches") && filereadable(dir . "/patches/series")
 	    let g:quilt_patches_dir = dir . "/patches"
-	    break
 	endif
 	if isdirectory(dir . "/.pc") && filereadable(dir . "/.pc/applied-patches")
 	    let g:quilt_source_dir = dir
 	endif
+	if g:quilt_patches_dir != ""
+	    break
+	endif
+	    break
 	if dir == "/"
 	    break
 	endif
