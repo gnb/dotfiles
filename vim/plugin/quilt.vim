@@ -60,7 +60,7 @@ function QuiltBufReadPre()
 	    let dir1 = strpart(relname, 0, stridx(relname, "/"))
 	    if (dir1 != "patches" && dir1 != ".pc" && relname != "x.patch" && relname != "TODO")
 		let b:quilt_name = relname
-		let inpatch = system("quilt files | grep '^" . b:quilt_name . "$'")
+		let inpatch = system("quilt files 2>/dev/null| grep '^" . b:quilt_name . "$'")
 		if inpatch == ""
 		    let b:quilt_in_patch = 0
 		    set ro
