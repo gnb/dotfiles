@@ -54,8 +54,8 @@ install-dotfiles:
 	done
 
 install-vim-modules:
-	for mod in $(VIM_MODULES) ; do \
-	    for file in `cd vimmods/$$mod; find $(VIM_SUBDIRS) -type f` ; do \
+	@for mod in $(VIM_MODULES) ; do \
+	    for file in `cd vimmods/$$mod; find $(VIM_SUBDIRS) -type f 2>/dev/null` ; do \
 		echo "installing vimmods/$$mod/$$file" ;\
 		$(INSTALL_DOTFILE) vimmods/$$mod/$$file $(DESTDIR)/$(dotdir)/vim/$$file ;\
 	    done ;\
