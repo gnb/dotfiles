@@ -35,7 +35,6 @@ function QuiltInit()
 	if g:quilt_patches_dir != ""
 	    break
 	endif
-	    break
 	if dir == "/"
 	    break
 	endif
