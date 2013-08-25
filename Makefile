@@ -61,8 +61,9 @@ install-vim-modules:
 	    done ;\
 	done
 
+DIFFCMD=    diff -uN
 diff:
-	$(MAKE) INSTALL_SCRIPT="diff -u" INSTALL_DOTFILE="diff -u" install
+	$(MAKE) INSTALL_SCRIPT="$(DIFFCMD)" INSTALL_DOTFILE="$(DIFFCMD)" install
 
 reverse-install:
 	@for file in $(SCRIPTS) ; do \
