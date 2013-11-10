@@ -382,12 +382,14 @@ function PatchTryApply()
 		endif
 		let hline = strpart(hline, 1)
 		let found = -1
-		for i in [0,1,2,3]
+		let i = 0
+		while i < len(contextlines)
 		    if hline == get(contextlines, i, "")
 			let found = i
 			break
 		    endif
-		endfor
+		    let i = i + 1
+		endwhile
 		if found >= 0
 		    let x = remove(contextlines, 0, found)
 		else
