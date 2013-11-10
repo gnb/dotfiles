@@ -325,10 +325,8 @@ function PatchTryApply()
     let lnum = 1
     for line in patchlines
 	if line =~ '^+++ '
-	    if fname != ""
-		if hnum != 0
-		    let hunkends[fname . ":" . hnum] = lnum - 1
-		endif
+	    if hnum != 0
+		let hunkends[fname . ":" . hnum] = lnum - 1
 	    endif
 	    let words = split(line)
 	    let fname = words[1]
@@ -337,20 +335,16 @@ function PatchTryApply()
 	    let fname = strpart(fname, stridx(fname, '/')+1)
 	    let hnum = 0
 	elseif line =~ '^@@ '
-	    if fname != ""
-		if hnum != 0
-		    let hunkends[fname . ":" . hnum] = lnum - 1
-		endif
-		let hnum = hnum + 1
-		let hunkstarts[fname . ":" . hnum] = lnum
+	    if hnum != 0
+		let hunkends[fname . ":" . hnum] = lnum - 1
 	    endif
+	    let hunkstarts[fname . ":" . hnum] = lnum
+	    let hnum = hnum + 1
 	endif
 	let lnum = lnum + 1
     endfor
-    if fname != ""
-	if hnum != 0
-	    let hunkends[fname . ":" . hnum] = lnum
-	endif
+    if hnum != 0
+	let hunkends[fname . ":" . hnum] = lnum
     endif
 
 "    for k in keys(hunkstarts)
