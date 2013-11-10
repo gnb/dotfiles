@@ -326,7 +326,7 @@ function PatchTryApply()
     for line in patchlines
 	if line =~ '^+++ '
 	    if hnum != 0
-		let hunkends[fname . ":" . hnum] = lnum - 1
+		let hunkends[fname . ":" . (hnum-1)] = lnum - 1
 	    endif
 	    let words = split(line)
 	    let fname = words[1]
