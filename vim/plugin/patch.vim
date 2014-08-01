@@ -338,8 +338,8 @@ function PatchTryApply()
 	    if hnum != 0
 		let hunkends[fname . ":" . hnum] = lnum - 1
 	    endif
-	    let hunkstarts[fname . ":" . hnum] = lnum
 	    let hnum = hnum + 1
+	    let hunkstarts[fname . ":" . hnum] = lnum
 	endif
 	let lnum = lnum + 1
     endfor
