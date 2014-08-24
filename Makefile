@@ -1,4 +1,5 @@
 
+os=$(shell uname -s)
 bindir=	$(HOME)/bin
 dotdir= $(HOME)
 
@@ -25,9 +26,11 @@ all: $(SCRIPTS)
 
 TIMESTAMP:=		$(shell date +%Y%m%d)
 INSTALL=		install
-INSTALL_BACKUP_OPTS=	--backup --suffix=.$(TIMESTAMP).bak
-INSTALL_SCRIPT=		$(INSTALL) -m 0755 -D $(INSTALL_BACKUP_OPTS)
-INSTALL_DOTFILE=	$(INSTALL) -m 0644 -D $(INSTALL_BACKUP_OPTS)
+
+INSTALL_BACKUP_OPTS_Linux=	--backup --suffix=.$(TIMESTAMP).bak
+INSTALL_BACKUP_OPTS_Darwin=	-b -B .$(TIMESTAMP).bak
+INSTALL_SCRIPT=		$(INSTALL) -m 0755 $(INSTALL_BACKUP_OPTS_$(os))
+INSTALL_DOTFILE=	$(INSTALL) -m 0644 $(INSTALL_BACKUP_OPTS_$(os))
 
 all: $(foreach m,$(VIM_MODULES),vimmods/$m/.build-stamp)
 
@@ -44,12 +47,14 @@ install: all install-scripts install-dotfiles install-vim-modules
 install-scripts:
 	@for file in $(SCRIPTS) ; do \
 	    echo "installing $$file" ;\
+	    mkdir -p `dirname $(DESTDIR)/$(bindir)/$$file` ;\
 	    $(INSTALL_SCRIPT) $$file $(DESTDIR)/$(bindir)/$$file ;\
 	done
 
 install-dotfiles:
 	@for file in $(DOTFILES) ; do \
 	    echo "installing $$file" ;\
+	    mkdir -p `dirname $(DESTDIR)/$(dotdir)/.$$file` ;\
 	    $(INSTALL_DOTFILE) $$file $(DESTDIR)/$(dotdir)/.$$file ;\
 	done
 
