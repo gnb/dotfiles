@@ -8,6 +8,7 @@ set formatoptions+=cro
 set nowrap
 syntax on
 highlight Comment ctermfg=darkgrey
+set hlsearch
 set exrc
 set modeline
 set modelines=5
