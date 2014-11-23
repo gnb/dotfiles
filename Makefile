@@ -62,6 +62,7 @@ install-vim-modules:
 	@for mod in $(VIM_MODULES) ; do \
 	    for file in `cd vimmods/$$mod; find $(VIM_SUBDIRS) -type f 2>/dev/null` ; do \
 		echo "installing vimmods/$$mod/$$file" ;\
+		mkdir -p `dirname $(DESTDIR)/$(dotdir)/vim/$$file` ;\
 		$(INSTALL_DOTFILE) vimmods/$$mod/$$file $(DESTDIR)/$(dotdir)/vim/$$file ;\
 	    done ;\
 	done
