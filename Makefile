@@ -3,6 +3,10 @@ os=$(shell uname -s)
 bindir=	$(HOME)/bin
 dotdir= $(HOME)
 
+ALT_C_Linux=	<Esc>c
+ALT_C_Darwin=	ç
+ALT_C=		$(ALT_C_$(os))
+
 SCRIPTS= \
     vgunique \
     linkinstall \
@@ -23,7 +27,12 @@ URL_markdown= https://github.com/plasticboy/vim-markdown/archive/master.tar.gz
 
 VIM_SUBDIRS= ftdetect after syntax plugin
 
-all: $(SCRIPTS)
+all: $(SCRIPTS) $(DOTFILES)
+
+%: %.in
+	sed \
+	    -e "s|@ALT_C@|$(ALT_C)|g" \
+	    <$< >$@
 
 TIMESTAMP:=		$(shell date +%Y%m%d)
 INSTALL=		install
