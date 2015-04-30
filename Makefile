@@ -13,6 +13,7 @@ DOTFILES= \
     vim/plugin/patch.vim \
     vim/plugin/quilt.vim \
     vim/plugin/valgrind.vim \
+    vim/plugin/python.vim \
 
 # External vim modules
 VIM_MODULES= \
