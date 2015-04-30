@@ -3,6 +3,8 @@
 if has("cscope")
 	if filereadable("/usr/bin/cscope")
 	    set csprg=/usr/bin/cscope
+	elseif filereadable("/usr/local/bin/cscope")
+	    set csprg=/usr/local/bin/cscope
 	elseif filereadable("/Library/CScope/bin/cscope")
 	    set csprg=/Library/CScope/bin/cscope
 	endif
