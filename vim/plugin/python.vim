@@ -13,6 +13,11 @@ function PythonPEP8Setup()
     let m = matchadd("TrailingWS", "[ \t]\\+$")
     " fold lines at 79 chars
     set textwidth=79
+    " 4-space indents with no tabs
+    set shiftwidth=4
+    set softtabstop=4
+    set tabstop=8
+    set expandtab
 endfunction
 
 autocmd FileType python call PythonPEP8Setup()
