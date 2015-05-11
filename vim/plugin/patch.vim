@@ -212,8 +212,14 @@ function PatchEditFile()
 	return
     endif
     let ll = line(".") - s:HunkStart() + s:HunkOldStart()
-    " Open a new buffer with the file and seek to the line
-    execute ":new " . file
+    let bufn = bufwinnr(file)
+    if bufn >= 0
+	execute bufn . "wincmd w"
+    else
+	" Open a new buffer with the file
+	execute ":new " . file
+    endif
+    " Seek to the line
     execute ":" . ll
 endfunction
 
