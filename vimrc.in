@@ -2,6 +2,7 @@ set autoindent
 set shiftwidth=4
 set softtabstop=4
 set tabstop=8
+set expandtab
 set textwidth=72
 set formatoptions+=cro
 " Remember:  gq]/  formats to the end of the comment
@@ -17,12 +18,10 @@ set ruler
 " Highlight trailing whitespace in red
 highlight TrailingWS ctermbg=red
 let m = matchadd("TrailingWS", "[ \t]\\+$")
-" Highlight non-normalised leading whitespace in red
-" where normalised means all the tabs are at the front
+" Highlight non-expanded leading whitespace in red
+" All our file formats in LinkedIn should be using expandtabs
 highlight BadLeadingWS ctermbg=red
-let m = matchadd("BadLeadingWS", "^[ \t]* \t[ \t]*")
-highlight BadLeadingWS2 ctermbg=red
-let m = matchadd("BadLeadingWS2", "^\t* \\{8,\\}[ \t]*")
+let m = matchadd("BadLeadingWS", "^ *\t\\+ *")
 " make Alt-C comment out a line in various modes
 autocmd FileType perl map <buffer> @ALT_C@ 0i# <Esc>j
 autocmd FileType sh map <buffer> @ALT_C@ 0i# <Esc>j
