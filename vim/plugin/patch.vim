@@ -93,8 +93,17 @@ function s:HunkShape()
 	return
     endif
     " Extract a line number from the hunk header
-    let matches = matchlist(getline(start), '^@@ -\(\d\+\),\(\d\+\) +\(\d\+\),\(\d\+\) @@\(.*\)')
-    return matches[1:5]
+    let line = getline(start)
+    let matches = matchlist(line, '^@@ -\(\d\+\),\(\d\+\) +\(\d\+\),\(\d\+\) @@\(.*\)')
+    if len(matches) >= 4
+	return matches[1:5]
+    endif
+    " corner cas: when the new text is the only line in the
+    " file then diff can report this as "1" not "1,1"
+    let matches = matchlist(line, '^@@ -\(\d\+\),\(\d\+\) +\(\d\+\) @@\(.*\)')
+    if len(matches) >= 3
+	return [matches[1], matches[2], matches[3], matches[3], matches[4]]
+    endif
 endfunction
 
 function s:HunkOldStart()
