@@ -341,25 +341,30 @@ function PatchTryApply()
     for line in patchlines
 	if line =~ '^+++ '
 	    if hnum != 0
-		let hunkends[fname . ":" . (hnum-1)] = lnum - 1
+		let hunkends[fname . ":" . hnum] = lnum - 1
+                " echo "XXX found end of hunk " . fname . ":" . hnum
 	    endif
 	    let words = split(line)
 	    let fname = words[1]
 
 	    " Hardcoded to -p1
 	    let fname = strpart(fname, stridx(fname, '/')+1)
+            " echo "XXX fname=" . fname
 	    let hnum = 0
 	elseif line =~ '^@@ '
 	    if hnum != 0
 		let hunkends[fname . ":" . hnum] = lnum - 1
+                " echo "XXX found end of hunk " . fname . ":" . hnum
 	    endif
 	    let hnum = hnum + 1
 	    let hunkstarts[fname . ":" . hnum] = lnum
+            " echo "XXX found start of hunk " . fname . ":" . hnum
 	endif
 	let lnum = lnum + 1
     endfor
     if hnum != 0
 	let hunkends[fname . ":" . hnum] = lnum
+        " echo "XXX found end of hunk " . fname . ":" . hnum
     endif
 
 "    for k in keys(hunkstarts)
