@@ -370,7 +370,7 @@ function PatchTryApply()
     let reports = []
     let fname = ""
     for line in split(output, '\n')
-	if line =~ '^patching file '
+	if line =~ '^\(patching\|checking\) file'
 	    let fname = strpart(line, 14)
 	elseif line =~ '^Hunk #[0-9]\+ succeeded at [0-9]\+ with fuzz'
 	    let hnum = matchstr(line, '[0-9]\+', 0, 1)
