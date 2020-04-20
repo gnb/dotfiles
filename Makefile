@@ -22,10 +22,12 @@ DOTFILES= \
 # External vim modules
 VIM_MODULES= \
     markdown \
+    scala \
 
 URL_markdown= https://github.com/plasticboy/vim-markdown/archive/master.tar.gz
+URL_scala= https://github.com/derekwyatt/vim-scala/archive/master.tar.gz
 
-VIM_SUBDIRS= ftdetect after syntax plugin
+VIM_SUBDIRS= ftdetect ftplugin after syntax plugin indent
 
 all: $(SCRIPTS) $(DOTFILES)
 
@@ -72,8 +74,8 @@ install-vim-modules:
 	@for mod in $(VIM_MODULES) ; do \
 	    for file in `cd vimmods/$$mod; find $(VIM_SUBDIRS) -type f 2>/dev/null` ; do \
 		echo "installing vimmods/$$mod/$$file" ;\
-		mkdir -p `dirname $(DESTDIR)/$(dotdir)/vim/$$file` ;\
-		$(INSTALL_DOTFILE) vimmods/$$mod/$$file $(DESTDIR)/$(dotdir)/vim/$$file ;\
+		mkdir -p `dirname $(DESTDIR)/$(dotdir)/.vim/$$file` ;\
+		$(INSTALL_DOTFILE) vimmods/$$mod/$$file $(DESTDIR)/$(dotdir)/.vim/$$file ;\
 	    done ;\
 	done
 
