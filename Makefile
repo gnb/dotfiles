@@ -18,6 +18,19 @@ DOTFILES= \
     vim/plugin/quilt.vim \
     vim/plugin/valgrind.vim \
     vim/plugin/python.vim \
+    config/nvim/colors/ironman.vim \
+    config/nvim/init.lua \
+    config/nvim/lua/gbanks/core/init.lua \
+    config/nvim/lua/gbanks/lazy.lua \
+    config/nvim/lua/gbanks/plugins/colorscheme.lua \
+    config/nvim/lua/gbanks/plugins/comment.lua \
+    config/nvim/lua/gbanks/plugins/dressing.lua \
+    config/nvim/lua/gbanks/plugins/lsp/init.lua \
+    config/nvim/lua/gbanks/plugins/lsp/lspconfig.lua \
+    config/nvim/lua/gbanks/plugins/lsp/mason.lua \
+    config/nvim/lua/gbanks/plugins/nvim-cmp.lua \
+    config/nvim/lua/gbanks/plugins/nvim-tree.lua \
+    config/nvim/lua/gbanks/plugins/telescope.lua \
 
 VIM_SUBDIRS= ftdetect ftplugin after syntax plugin indent
 
