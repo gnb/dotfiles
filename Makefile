@@ -19,14 +19,6 @@ DOTFILES= \
     vim/plugin/valgrind.vim \
     vim/plugin/python.vim \
 
-# External vim modules
-VIM_MODULES= \
-    markdown \
-    scala \
-
-URL_markdown= https://github.com/plasticboy/vim-markdown/archive/master.tar.gz
-URL_scala= https://github.com/derekwyatt/vim-scala/archive/master.tar.gz
-
 VIM_SUBDIRS= ftdetect ftplugin after syntax plugin indent
 
 all: $(SCRIPTS) $(DOTFILES)
@@ -44,17 +36,7 @@ INSTALL_BACKUP_OPTS_Darwin=	-b -B .$(TIMESTAMP).bak
 INSTALL_SCRIPT=		$(INSTALL) -m 0755 $(INSTALL_BACKUP_OPTS_$(os))
 INSTALL_DOTFILE=	$(INSTALL) -m 0644 $(INSTALL_BACKUP_OPTS_$(os))
 
-all: $(foreach m,$(VIM_MODULES),vimmods/$m/.build-stamp)
-
-vimmods/%/.build-stamp:
-	mkdir -p $(@D)
-	cd $(@D) ; wget -O - $(URL_$*) | tar -xvzf - --strip 1
-	touch $@
-
-clean:
-	$(RM) -r $(foreach m,vimmods/$m,$(VIM_MODULES))
-
-install: all install-scripts install-dotfiles install-vim-modules
+install: all install-scripts install-dotfiles
 
 install-scripts:
 	@for file in $(SCRIPTS) ; do \
@@ -68,15 +50,6 @@ install-dotfiles:
 	    echo "installing $$file" ;\
 	    mkdir -p `dirname $(DESTDIR)/$(dotdir)/.$$file` ;\
 	    $(INSTALL_DOTFILE) $$file $(DESTDIR)/$(dotdir)/.$$file ;\
-	done
-
-install-vim-modules:
-	@for mod in $(VIM_MODULES) ; do \
-	    for file in `cd vimmods/$$mod; find $(VIM_SUBDIRS) -type f 2>/dev/null` ; do \
-		echo "installing vimmods/$$mod/$$file" ;\
-		mkdir -p `dirname $(DESTDIR)/$(dotdir)/.vim/$$file` ;\
-		$(INSTALL_DOTFILE) vimmods/$$mod/$$file $(DESTDIR)/$(dotdir)/.vim/$$file ;\
-	    done ;\
 	done
 
 DIFFCMD=    diff -uN
