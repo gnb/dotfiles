@@ -14,7 +14,7 @@ vim.opt.listchars = 'tab:\\u25b6 ,leadmultispace:\\u25b8   ,trail:\\u00b7'
 -- Neovim needs this to choose non-garish colors
 vim.opt.background = 'light'
 vim.opt.termguicolors = true
-vim.cmd('colorscheme ironman')
+vim.cmd('colorscheme wildcharm')
 vim.opt.smartindent = true
 
 vim.g.mapleader = ' '

@@ -18,7 +18,6 @@ DOTFILES= \
     vim/plugin/quilt.vim \
     vim/plugin/valgrind.vim \
     vim/plugin/python.vim \
-    config/nvim/colors/ironman.vim \
     config/nvim/init.lua \
     config/nvim/lua/gbanks/core/init.lua \
     config/nvim/lua/gbanks/lazy.lua \
