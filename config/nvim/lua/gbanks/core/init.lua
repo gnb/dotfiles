@@ -22,7 +22,10 @@ vim.g.mapleader = ' '
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "java",
     callback = function()
-        vim.opt_local.shiftwidth = 2
-        vim.opt.listchars = 'tab:\\u25b6 ,leadmultispace:\\u25b8 ,trail:\\u00b7'
+        -- $currentJob uses 4-space indents in Java
+        -- vim.opt_local.shiftwidth = 2
+        -- vim.opt.listchars = 'tab:\\u25b6 ,leadmultispace:\\u25b8 ,trail:\\u00b7'
+        vim.opt_local.shiftwidth = 4
+        vim.opt.listchars = 'tab:\\u25b6 ,leadmultispace:\\u25b8   ,trail:\\u00b7'
     end
 })
