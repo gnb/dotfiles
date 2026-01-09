@@ -63,29 +63,33 @@ return {
     local capabilities = cmp_nvim_lsp.default_capabilities()
 
 
-    -- Change the Diagnostic symbols in the sign column (gutter)
-    -- (not in youtube nvim video)
-    local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
-    for type, icon in pairs(signs) do
-      local hl = "DiagnosticSign" .. type
-      vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
-    end
-
-    local util = require('lspconfig.util')
+    -- use the nvim 0.11 way of configuring diagnostic signs
+    vim.diagnostic.config({
+        signs = {
+            text = {
+                [vim.diagnostic.severity.ERROR] = "\u{F05E}",   -- fontawesome "ban"
+                [vim.diagnostic.severity.WARN] = "\u{F071}",    -- fontawesome "triangle-exclamation"
+                [vim.diagnostic.severity.HINT] = "\u{F0EB}",    -- fontawesome "lightbulb"
+                [vim.diagnostic.severity.INFO] = "\u{F05A}",    -- fontawesome "circle-info"
+            }
+        }
+    })
 
     -- configure python server
-    lspconfig["pyright"].setup({
+    vim.lsp.config("pyright", {
       capabilities = capabilities,
       on_attach = on_attach,
     })
+    vim.lsp.enable("pyright")
 
     -- configure jdtls server
-    lspconfig["jdtls"].setup({
-      cmd = { vim.fn.stdpath("data") .. "/mason/bin/jdtls" },
+    vim.lsp.config("jdtls", {
+      cmd = { "/opt/homebrew/bin/jdtls" },
       capabilities = capabilities,
       on_attach = on_attach,
-      root_dir = util.root_pattern('product-spec.json', '.git'),
+      root_markers = { '.git', 'pom.xml' }
     })
+    vim.lsp.enable("jdtls")
 
   end
 }
