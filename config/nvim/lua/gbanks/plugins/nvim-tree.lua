@@ -22,8 +22,12 @@ return {
 		    },
                     glyphs = {
                         folder = {
-                          arrow_closed = "▶", -- arrow when folder is closed
-                          arrow_open = "▼", -- arrow when folder is open
+                          -- larger arrows
+--                          arrow_closed = "\u{25B6}", -- Unicode BLACK RIGHT-POINTING TRIANGLE
+--                          arrow_open = "\u{25BC}", -- Unicode BLACK DOWN-POINTING TRIANGLE
+                          -- smaller arrows
+                          arrow_closed = "\u{25B8}", -- Unicode BLACK RIGHT-POINTING SMALL TRIANGLE
+                          arrow_open = "\u{25BE}", -- Unicode BLACK DOWN-POINTING SMALL TRIANGLE
                         },
                     },
                 },
