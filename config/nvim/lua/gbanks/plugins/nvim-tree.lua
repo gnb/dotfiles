@@ -13,7 +13,7 @@ return {
         -- configure nvimtree
         nvimtree.setup({
             view = {
-                width = 35,
+                width = 50,
             },
             renderer = {
                 icons = {
